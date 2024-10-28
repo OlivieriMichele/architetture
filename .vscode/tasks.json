@@ -5,11 +5,13 @@
             "label": "C/C++: cl.exe build active file",
             "command": "cl.exe",
             "args": [
-                "/Zi",
-                "/EHsc",
                 "/nologo",
                 "/Fe${workspaceFolder}\\bin\\${fileBasenameNoExtension}.exe",
-                "${file}"
+                "/Fo:NUL",
+                "${file}",
+                "&&",
+                "del",
+                "${fileDirname}\\NUL.obj",
             ],
             "options": {
                 "cwd": "${fileDirname}"
