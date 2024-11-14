@@ -16,7 +16,7 @@
 
 void main() {
 	// Le stringhe da ordinare (array di puntatori)
-	char* strings[] = { "prova","1","michele","31","bianca","ciao","nicolò" };
+	char* strings[] = { "prova","1","michele","31","bianca","ciao" };
 	// Il numero di stringhe nell'array
 	int num = sizeof(strings) / sizeof(strings[0]);
 
@@ -29,7 +29,7 @@ void main() {
 
 		j_loop:
 			MOV ESI, [strings + EAX*4]		; carica strings[j] in ESI
-			MOV EDI, [strings + EAX*4 + 4]	; carica strings[j+1] in EDI
+			MOV EDI, [strings + EAX*4 +4]	; carica strings[j+1] in EDI
 			MOV BL, BYTE PTR [ESI]			; carica il primo carattere della stringa 
 			MOV BH, BYTE PTR [EDI]			; carica il primo carattere della stringa
 			CMP BL, BH
