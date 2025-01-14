@@ -6,15 +6,14 @@
             "command": "cl.exe",
             "args": [
                 "/nologo",
+                "/Zi", // Aggiunge informazioni di debug
+                "/Od", // Disabilita ottimizzazioni
                 "/Fe${workspaceFolder}\\bin\\${fileBasenameNoExtension}.exe",
-                "/Fo:NUL",
-                "${file}",
-                "&&",
-                "del",
-                "${fileDirname}\\NUL.obj",
+                "/Fo${workspaceFolder}\\bin\\${fileBasenameNoExtension}.obj",
+                "${file}"
             ],
             "options": {
-                "cwd": "${fileDirname}"
+                "cwd": "${workspaceFolder}"
             },
             "problemMatcher": [
                 "$msCompile"

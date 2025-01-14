@@ -16,40 +16,51 @@
 
 void main() {
 	// Le stringhe da ordinare (array di puntatori)
-	char* strings[] = { "prova","1","michele","31","bianca","ciao","pizza" };
+	char* strings[] = { "a", "ad", "ai", "alle", "altre", "botte", "che", "chioccia", "colori", "contadino", "contadino", "dallaltra", "del", "della", "dellaia", "delle", "Deluso", "di", "di", "di", "dipingerlo", "e", "e", "e", "fare", "galline", "gallo", "gran", "i", "il", "il", "il", "in", "indifferente", "lavori", "le", "le", "lo", "mette", "mezzo", "nascosto", "parte", "pavone", "per", "per", "pero", "Poi", "putiferio", "quando", "Questa", "reazioni", "resta", "riempie", "rimette", "scherzo", "si", "sottrae", "spiare", "sta", "sue", "suoi", "tornarsene", "tutti", "tutto", "Un", "un", "un", "una", "uno", "uova", "uovo", "vede", "vuol"};
+
 	// Il numero di stringhe nell'array
 	int num = sizeof(strings) / sizeof(strings[0]);
 
-	__asm{
-			MOV ECX, num			; ECX = i, indice del ciclo esterno
+	__asm
+	{
+			MOV ECX, num		; indice del ciclo esterno
+			CMP ECX, 1
+			JLE fine
 			DEC ECX
 
-		i_loop:
-			XOR EAX, EAX 			; EAX = j, indice del ciclo interno
-			XOR EDX, EDX			; indice usato per accedere alla lettera della stringa
+		esterno:
+			XOR EAX, EAX 		; indice del ciclo interno
+			XOR EDX, EDX		; indice usato per accedere alla lettera della stringa
+			DEC EDX
 
-		next: 
+		prossimo: 
 			INC EDX
 
-		j_loop:
-			MOV ESI, [strings + EAX*4]		; carica strings[j] in ESI
-			MOV EDI, [strings + EAX*4 +4]	; carica strings[j+1] in EDI
+		interno:
+			MOV ESI, [strings + EAX*4]			; carica strings di j in ESI
+			MOV EDI, [strings + ECX*4]		; carica strings di j+1 in EDI
 			MOV BL, [ESI][EDX]				; carica il primo carattere della stringa 
 			MOV BH, [EDI][EDX]				; carica il primo carattere della stringa
+			CMP BL,0
+			JE noninvertire
+			CMP BH,0
+			JE scambia
 			CMP BL, BH
-			JL no_swap				; non esegue lo sccambio se strings[j][0] < strings[j+1][0]
-			JE next					; confronta le seconde lettare in caso di ugualianza della prima
+			JL noninvertire					; non esegue lo sccambio se strings di j,0 < strings di j+1,0
+			JE prossimo						; confronta le seconde lettare in caso di ugualianza della prima
 
-			MOV [strings + EAX*4], EDI		; scambia strings[j] con strings[j+1]
-			MOV [strings + EAX*4 +4], ESI	; scambia strings[j+1] con strings[j]
+		scambia:
+			MOV [strings + EAX*4], EDI		; scambia strings di j con strings di j+1
+			MOV [strings + ECX*4], ESI	; scambia strings di j+1 con strings di j
 
-		no_swap:
+		noninvertire:
 			XOR EDX, EDX
 			INC EAX					; incrementta j
-			CMP EAX, ECX			; if (j < i)
-			JL j_loop				; rientra nel ciclo
+			CMP EAX, ECX			; confronta j minore i
+			JL interno				; rientra nel ciclo
 
-			LOOP i_loop
+			LOOP esterno
+		fine:
 	}
 
 	// Stampa su video
@@ -57,5 +68,7 @@ void main() {
 		int i;
 		for (i = 0; i < num; i++)
 			printf("%s\n", strings[i]);
+		
+		printf("%d\n", i);
 	}
 }
