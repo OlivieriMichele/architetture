@@ -16,9 +16,9 @@
 void main()
 {
     // Input
-    unsigned char vet[] = { 3,3 };
-    unsigned int len = 16;	// lunghezza (numero di bit)
-    unsigned char n = 7;	// numero di bit dati
+    unsigned char vet[] = { 2,4,67,2,2,58,99 };
+    unsigned int len = 55;	// lunghezza (numero di bit)
+    unsigned char n = 4;	// numero di bit dati
 
     // Ouput
     unsigned char errori = 0;	// 1 = errori; 0 = no errori
@@ -37,7 +37,7 @@ void main()
         and ecx, 7              ; ecx = esi % 8, posizione del byte che contiene il bit di parità
         not ecx
         inc ecx 
-        and ecx, 7
+        and ecx, 7              ; ecx = 8 - ecx % 8 perché scorriamo il byte dal bit meno significativo
         cmp ecx, 0
         jne non_dec             ; in caso di resto zero il byte che mi serve sarà indice -1
         dec edi
@@ -45,22 +45,20 @@ void main()
         mov dl, vet[edi]        ; carica il byte che voglio esaminare
         mov dh, vet[edi-1]
 
-        xor ecx, ecx
-        mov cl, n               ; ecx = n
-
-    shift_loop:
+    shift_loop:                 ; aggiorna la maschera in base alla posizione del bit di parità
         shl ebx, 1
-        dec edi
-        cmp edi, 0
+        dec ecx
+        cmp ecx, 0
         jge shift_loop
+        xor ecx, ecx
+        mov cl, n               ; indice del prossimo cilo che controlla gli n bit e mette la somma degli 1 in eax
 
     inner_loop:
         dec cl
-        test edx, ebx            ; estrae il bit meno significativo
+        test edx, ebx           ; estrae il bit meno significativo
         jz not_inc
-        inc eax
+        inc eax                 ; ecx = n mi servirà per decrementare len - (n + bit di parità)
     not_inc:
-
         shl ebx, 1              ; sposta la maschera a sinistra
         cmp cl, 0
         jne inner_loop
@@ -69,12 +67,13 @@ void main()
 
         ; a questo punto eax contine il conteggio dei bit a 1, dx la parte di vettore che voglio esaminare
         mov ebx, esi
-        and ebx, 7              ; ebx = il bit del vettore che è il bit di parità
+        and ebx, 7              ; ebx = il bit del vettore che è il bit di parità        
         not bl
         inc bl
-        and bl, 7
+        and bl, 7               ; bl = 8 - resto sempre perché sto scorrendo il byte dal bit meno significativo
 
-    shift_loop2:                ; sposto il bit nel bit meno significativo
+
+    shift_loop2:                ; sposto il bit nel bit di parità in ultima posizione
         cmp ebx, 0
         jle stop_shift
         shr edx, 1
@@ -83,13 +82,12 @@ void main()
     stop_shift:
 
         and edx, 1              ; edx avvrà nel bit meno significativo il bit di parità
+        and eax, 1              ; considero di eax solo il bit meno significativo che è a 1 se è dispari
         cmp al, dl
         jne _error              ; se il bit di parità è deiverso dal conteggio
 
-        ;continua a processare i successivi n bit
-        sub esi, ecx
+        sub esi, ecx            ; continua a processare i successivi n bit
         jnz _loop
-
         jmp _endloop
 
     _error:
