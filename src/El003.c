@@ -16,9 +16,9 @@
 void main()
 {
     // Input
-    unsigned char vet[] = { 2,4,67,2,2,58,99 };
-    unsigned int len = 55;	// lunghezza (numero di bit)
-    unsigned char n = 4;	// numero di bit dati
+    unsigned char vet[] = { 3,3 };
+    unsigned int len = 16;	// lunghezza (numero di bit)
+    unsigned char n = 7;	// numero di bit dati
 
     // Ouput
     unsigned char errori = 0;	// 1 = errori; 0 = no errori
@@ -26,9 +26,6 @@ void main()
     __asm
     {
         mov esi, len            ; inizializza il contatore
-        xor ecx, ecx
-        mov cl, n               ; ecx = n
-        inc ecx
         xor edx, edx            ; inizializza il contenitore degli elem del vettore
 
     _loop:
@@ -36,13 +33,20 @@ void main()
         mov ebx, 1              ; maschera iniziale per estrarre il bit meno significativo
         mov edi, esi            ; edi = esi / 8, indice del vettore che contiene il bit che voglio esaminare
         shr edi, 3
+        mov ecx, esi
+        and ecx, 7              ; ecx = esi % 8, posizione del byte che contiene il bit di parità
+        not ecx
+        inc ecx 
+        and ecx, 7
+        cmp ecx, 0
+        jne non_dec             ; in caso di resto zero il byte che mi serve sarà indice -1
+        dec edi
+    non_dec:
         mov dl, vet[edi]        ; carica il byte che voglio esaminare
         mov dh, vet[edi-1]
-        mov edi, esi
-        and edi, 7              ; edi = esi % 8, posizione del byte che contiene il bit di parità
-        not edi
-        inc edi 
-        and edi, 7
+
+        xor ecx, ecx
+        mov cl, n               ; ecx = n
 
     shift_loop:
         shl ebx, 1
@@ -51,14 +55,17 @@ void main()
         jge shift_loop
 
     inner_loop:
+        dec cl
         test edx, ebx            ; estrae il bit meno significativo
         jz not_inc
         inc eax
     not_inc:
 
         shl ebx, 1              ; sposta la maschera a sinistra
-        cmp ebx, 1 << 6         ; verifica se abbiamo processato n bit {va aggiornato dinamicamente}
+        cmp cl, 0
         jne inner_loop
+        mov cl, n
+        inc ecx
 
         ; a questo punto eax contine il conteggio dei bit a 1, dx la parte di vettore che voglio esaminare
         mov ebx, esi
