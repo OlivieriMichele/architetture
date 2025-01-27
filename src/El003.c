@@ -16,9 +16,9 @@
 void main()
 {
     // Input
-    unsigned char vet[] = {0x5D,0xC4,0x8A,0x81,0xEA,0xC5,0xE4,0x76,0x8D,0x93,0x01,0x4C,0x4B,0x75,0x47,0x49,0x07,0x71,0x15,0xEC,0xDB,0x1F,0xDC,0xD4,0xCA};
-    unsigned int len = 104;	// lunghezza (numero di bit)
-    unsigned char n = 99;	// numero di bit dati
+    unsigned char vet[] = {0xE3,0xA5,0x0E,0x92,0x2F,0xB2,0x00};
+    unsigned int len = 50;	// lunghezza (numero di bit)
+    unsigned char n = 4;	// numero di bit dati
 
     // Ouput
     unsigned char errori = 0;	// 1 = errori; 0 = no errori
@@ -42,16 +42,19 @@ void main()
         mov cx, si
         add cx, bx
         and cx, 7                   ; calcolo il resto della divisione per 8 = indice del bit da controllare
+
     _shift_mask:
         cmp cx, 0                   ; porta nel bit meno significativo il primo bit da controllare
         jle _next
         shr dx, 1
         dec cx
         jmp _shift_mask
+
 	_next:
 		test dl, 1					; controllo il bit meno significativo
 		jz _not_inc
 		inc eax
+
 	_not_inc:
 		shr dl, 1					; analizza il bit successivo
 		inc ebx
