@@ -9,54 +9,52 @@ void main()
 
     __asm{
         MOV AX,Mat
-        AND AX,00FFh
-        NEG AX
-        MOV CX,-4
-        SUB AX,CX
-        MOV Ris1,AX
+        ADD AX,7
+        MOV BX,AX
+        SHL BX,1
+        XOR BX,AX
+        MOV CX,BX
+        XOR CX,AX
+        MOV Ris1,CX
         // --------------------------------------
-        XOR EAX,EAX
-        MOV DX,Mat
+        MOV ECX,4
         MOV AX,Mat
-        SHL EDX,16
-        OR EDX,EAX
-        BSWAP EDX ; Converte little-endian/big-endian e viceversa
-        ROL EDX,6
-        MOV Ris2,DX
-        // --------------------------------------
-        LEA ESI,Vet
+        SHL EAX,16
         MOV AX,Mat
-        MOV ECX,16
-        ROL ECX,7
-        L1: MOV BL,AL
-        AND BL,3
-        MOV BYTE PTR Vet[ECX],BL
-        SHR AX,2
+        MOV EBX,0
+        L1: MOV BYTE PTR Vet[EBX],AL
+        SHR EAX,8
+        INC EBX
         LOOP L1
-        MOV AX,WORD PTR Vet[14]
-        MOV DX,WORD PTR Vet[12]
-        SHL DX,4
-        OR AX,DX
-        MOV Ris3,AX
+        PUSH WORD PTR Vet[1]
+        POP Ris2
+        // --------------------------------------
+        XOR AX,AX
+        MOV DX,Mat
+        INC DX
+        SUB AX,DX
+        JS L2
+        MOV AX,0FFFFh
+        JMP L3
+        L2: NEG AX
+        XCHG AL,AH ; XCHG a,b scambia il contenuto dei registri a e b
+        ROL AX,8
+        ROL AL,1
+        L3: MOV Ris3,AX
         // --------------------------------------
         MOV AX,Mat
-        AND AX,5Eh
-        MOV BL,0FDh
-        IDIV BL ; Divis. con segno di AX per r/m8: ris. in AL, resto in AH
+        AND AL,70h
+        OR AL,80h
+        XOR BL,BL
+        DEC BL
+        IMUL BL ; Moltiplic. con segno di AL per r/m8: ris. in AX
         MOV Ris4,AX
         // --------------------------------------
-        XOR ECX,ECX
-        MOV BL,3
         MOV AX,Mat
-        AND AX,3
-        OR AX,2
-        MOV CX,AX
-        L2: MUL BL ; Moltiplicazione senza segno di AL per r/m8:risultato in AX
-        LOOP L2
-        MOV AH,AL
-        NOT AH
+        SHR AX,8
+        MOV BL,5
+        DIV BL ; Divisione senza segno di AX per r/m8: quoziente in AL, resto in AH
         MOV Ris5,AX
-
     }
 
     printf("%x, %x, %x, %x, %x",Ris1,Ris2,Ris3,Ris4,Ris5);
